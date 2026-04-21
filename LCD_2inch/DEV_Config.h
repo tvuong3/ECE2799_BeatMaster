@@ -35,9 +35,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <SPI.h>
+#include <Arduino.h>
 #include "Debug.h"
-#include <avr/pgmspace.h>
-
+// #include <avr/pgmspace.h>
+#include <pgmspace.h>
 
 
 #define UBYTE   uint8_t
@@ -55,10 +56,10 @@
 // #define DEV_BL_PIN  4
 
 // ESP32 DEFINITIONS
-// #define DEV_CS_PIN 15
-// #define DEV_DP_PIN 27
-// #define DEV_RST_PIN 26
-// #define DEV_BL_PIN 25
+#define DEV_CS_PIN 15
+#define DEV_DC_PIN 27
+#define DEV_RST_PIN 26
+#define DEV_BL_PIN 25
 
 
 /**
@@ -78,7 +79,7 @@
 **/
 #define DEV_Delay_ms(__xms)    delay(__xms)
 
-/**
+/** 
  * PWM_BL
 **/
  #define  DEV_Set_PWM(_Value)  analogWrite(DEV_BL_PIN, _Value)

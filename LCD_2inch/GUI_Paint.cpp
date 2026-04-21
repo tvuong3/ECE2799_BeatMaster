@@ -78,7 +78,7 @@
 #include <math.h>
 
 // Adding in to resolve error with 'dtostrf' function
-#include <avr/dtostrf.h>
+// #include <avr/dtostrf.h>
 
 volatile PAINT Paint;
 
@@ -654,7 +654,9 @@ void Paint_DrawFloatNum(UWORD Xpoint, UWORD Ypoint, double Nummber,  UBYTE Decim
                         sFONT* Font,  UWORD Color_Background, UWORD Color_Foreground)
 {
   char Str[ARRAY_LEN] = {0};
-  dtostrf(Nummber,0,Decimal_Point+2,Str);
+  // Fixing poor implementation of 'dtostrf'
+  // dtostrf(Nummber,0,Decimal_Point+2,Str);
+  snprintf(Str, sizeof(Str), "%.*f", Decimal_Point+2, Nummber);
   char * pStr= (char *)malloc((strlen(Str))*sizeof(char));
   memcpy(pStr,Str,(strlen(Str)-2));
   * (pStr+strlen(Str)-1)='\0';
@@ -705,9 +707,8 @@ void Paint_DrawTime(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font,
 ******************************************************************************/
 void Paint_DrawImage(const unsigned char *image, UWORD xStart, UWORD yStart, UWORD W_Image, UWORD H_Image)
 {
-  int i, j;
-  for (j = 0; j < H_Image; j++) {
-    for (i = 0; i < W_Image; i++) {
+  for (int j = 0; j < H_Image; j++) {
+    for (int i = 0; i < W_Image; i++) {
       if (xStart + i < LCD_WIDTH  &&  yStart + j < LCD_HEIGHT) //Exceeded part does not display
         Paint_SetPixel(xStart + i, yStart + j, (pgm_read_byte(image + j * W_Image * 2 + i * 2 + 1)) << 8 | (pgm_read_byte(image + j * W_Image * 2 + i * 2)));
       //Using arrays is a property of sequential storage, accessing the original array by algorithm

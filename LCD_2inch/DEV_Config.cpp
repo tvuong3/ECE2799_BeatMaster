@@ -30,7 +30,7 @@
 #
 ******************************************************************************/
 #include "DEV_Config.h"
-
+#include <Arduino.h>
 void GPIO_Init()
 {
   pinMode(DEV_CS_PIN, OUTPUT);
@@ -52,5 +52,7 @@ void GPIO_Init()
   // SPI.setDataMode(SPI_MODE3);
   // SPI.setBitOrder(MSBFIRST);
   // SPI.setClockDivider(SPI_CLOCK_DIV2);
-  SPI.begin();
+  // SPI.begin();
+  SPI.begin(18, -1, 23, DEV_CS_PIN);
+  SPI.setFrequency(80000000);
 }

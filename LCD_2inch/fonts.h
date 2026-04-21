@@ -51,7 +51,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include <avr/pgmspace.h>
+// #include <avr/pgmspace.h>
+#include <pgmspace.h>
 //ASCII
 typedef struct _tFont
 {    
