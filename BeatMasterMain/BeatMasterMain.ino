@@ -7,8 +7,6 @@
 #include "metronome.h"
 #include "LCD_Driver.h"
 #include "GUI_Paint.h"
-#include "DEV_Config.h"
-#include "fonts.h"
 #include <SPI.h>
 
 // pin assignments
