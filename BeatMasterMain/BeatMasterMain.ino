@@ -49,34 +49,68 @@ int leadInCount = 0;
 
 void setup() {
   Serial.begin(115200);
-
+  // while(!Serial);
+  // delay(5000);
+  Serial.println("Setup started");
   // LCD
   Config_Init();
+    Serial.println("config started");
+
   LCD_Init();
-  LCD_Clear(BLACK);
+    Serial.println("init started");
+
+  //LCD_Clear(BLACK);
+    Serial.println("clear started");
+
+  LCD_Clear(0xF800);
   Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLACK);
   Paint_Clear(BLACK);
+  // test
+  Paint_DrawString_EN(10, 10, "BeatMaster+", &Font24, WHITE, WHITE);
+  Paint_DrawString_EN(0, 32, "LCD working!", &Font16, WHITE, WHITE);
 
-  // modules
-  sdInit();
-  menuInit();
-  controlsInit();
-  hitDetectionInit();
-  setupLedStrip();
-  setupRing();
+
+  // // LCD
+  // Config_Init();
+  // LCD_Init();
+  // LCD_Clear(BLACK);
+  // Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLACK);
+  // Paint_Clear(BLACK);
+
+  // // modules
+  // sdInit();
+  // menuInit();
+  // controlsInit();
+  // hitDetectionInit();
+  // setupLedStrip();
+  // setupRing();
 
   // metronome
   metro.begin();
   metro.setMeasure(4);
+
 }
 
 
 void loop() {
-  controlsUpdate();
+  static bool screenInitialized = false;
+  if(!screenInitialized) {
+    Serial.print("Initializing screen in Loop\n");
+    Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLUE);
+    digitalWrite(DEV_BL_PIN, HIGH);
+    delay(1000);
+    screenInitialized = true;
+  }
+  Paint_Clear(GREEN);
+  // controlsUpdate();
+  Serial.print("We Loopin\n");
+
+
 
   switch (currentState) {
 
     case STATE_POWER_ON:
+    Serial.print("Current State: Power On\n");
      Paint_Clear(BLACK);
      Paint_DrawString_EN(0, 100, "BeatMaster+", &Font24, WHITE, BLACK);
      delay(2000);
@@ -84,24 +118,32 @@ void loop() {
      break;
 
      case STATE_MAIN_MENU: {
+      Serial.print("Current State: Menu\n");
       Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Select Mode:", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 32, currentOption == FREE_PLAY ? "> Free Play" : "  Free Play", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 48, currentOption == RUDIMENTS ? "> Rudiments" : "  Rudiments", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 64, currentOption == SOUND_LIBRARY ? "> Sound Library" : "  Sound Library", &Font16, WHITE, BLACK);
-      MenuOption selected = menuUpdate();
-      if (selected == FREE_PLAY) currentState = STATE_FREE_PLAY;
-      if (selected == RUDIMENTS) currentState = STATE_RUDIMENT_SELECT;
-      if (selected == SOUND_LIBRARY) currentState = STATE_SOUND_LIBRARY;
+      Paint_DrawString_EN(0, 0, "Select Mode:", &Font16, GREEN, BLACK);
+      Paint_DrawString_EN(0, 32, currentOption == FREE_PLAY ? "> Free Play" : "  Free Play", &Font16, GREEN, BLACK);
+      Paint_DrawString_EN(0, 48, currentOption == RUDIMENTS ? "> Rudiments" : "  Rudiments", &Font16, WHITE, WHITE);
+      Paint_DrawString_EN(0, 64, currentOption == SOUND_LIBRARY ? "> Sound Library" : "  Sound Library", &Font16, WHITE, WHITE);
+      Paint_DrawCircle(0, 100, 10)
+      
+      delay(3000);
+      // MenuOption selected = menuUpdate();
+      // if (selected == FREE_PLAY) currentState = STATE_FREE_PLAY;
+      // if (selected == RUDIMENTS) currentState = STATE_RUDIMENT_SELECT;
+      // if (selected == SOUND_LIBRARY) currentState = STATE_SOUND_LIBRARY;
+      // TESTING PURPOSES ONLY
+      currentState = STATE_FREE_PLAY;
       break;
     }
 
     case STATE_FREE_PLAY:
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Free Play", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 32, metronomeOn ? "Metronome: ON" : "Metronome: OFF", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 48, "Click: toggle metro", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 64, "Left: exit", &Font16, WHITE, BLACK);
+      Serial.print("Current State: Freeplay\n");
+      Paint_Clear(LIGHTBLUE);
+      Paint_DrawString_EN(0, 0, "Free Play", &Font16, LIGHTBLUE, BLACK);
+      Paint_DrawString_EN(0, 32, metronomeOn ? "Metronome: ON" : "Metronome: OFF", &Font16, LIGHTBLUE, BLACK);
+      Paint_DrawString_EN(0, 48, "Click: toggle metro", &Font16, LIGHTBLUE, BLACK);
+      Paint_DrawString_EN(0, 64, "Left: exit", &Font16, LIGHTBLUE, BLACK);
+      delay(1000);
       metro.setBeatsPerMinute(currentBPM);
       if (metronomeOn) metro.check();
       readSensor();
@@ -118,6 +160,7 @@ void loop() {
       break;
 
     case STATE_RUDIMENT_SELECT: {
+      Serial.print("Current State: Rudiment Select\n");
       Paint_Clear(BLACK);
       Paint_DrawString_EN(0, 0, "Select Rudiment:", &Font16, WHITE, BLACK);
       int count = getFileCount("/rudiments");
