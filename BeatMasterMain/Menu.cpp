@@ -8,6 +8,9 @@ int rudimentIndex = 0;
 int soundIndex = 0;
 int activeSound = 0;
 bool metronomeOn = false;
+//bool menuWentBack = false;
+String lastSelectedRudiment = "";
+String lastSelectedSound = "";
 int currentBPM = 0;
 int lockedBPM = 0;
 
@@ -50,7 +53,7 @@ MenuOption menuUpdate(){
 }
 
 
-String RudimentMenuUpdate(){
+MenuResult RudimentMenuUpdate(){
   int x = analogRead(JOY_VRX);
   int y = analogRead(JOY_VRY);
   int btn = digitalRead(JOY_SW);
@@ -59,7 +62,7 @@ String RudimentMenuUpdate(){
   if (y < 1000 && rudimentIndex > 0) {
     rudimentIndex = rudimentIndex - 1;
     delay(200);
-}
+  }
   // go down
   if (y > 3000 && rudimentIndex < getFileCount("/rudiments") - 1) {
     rudimentIndex = rudimentIndex + 1;
@@ -69,20 +72,22 @@ String RudimentMenuUpdate(){
   if (x < 1000) {
     rudimentIndex = 0;
     delay(200);
-    return "";
+    //menuWentBack = true;
+    return MENU_BACK;
   } 
   // select
   if (x > 3000 || btn == LOW) {
     delay(200);
-    return getFileName("/rudiments", rudimentIndex);
+    lastSelectedRudiment = getFileName("/rudiments", rudimentIndex);
+    return MENU_SELECTED;
   } 
   // nothing happened
-  return "";
+  return MENU_NONE;
 }
 
 
 
-String SoundMenuUpdate(){
+MenuResult SoundMenuUpdate(){
   int x = analogRead(JOY_VRX);
   int y = analogRead(JOY_VRY);
   int btn = digitalRead(JOY_SW);
@@ -101,16 +106,18 @@ String SoundMenuUpdate(){
   if (x < 1000) {
     soundIndex = 0;
     delay(200);
-    return "";
+    //menuWentBack = true;
+    return MENU_BACK;
   } 
   // select
   if (x > 3000 || btn == LOW) {
     delay(200);
     activeSound = soundIndex;
-    return getFileName("/soundlibrary", soundIndex);
+    lastSelectedSound = getFileName("/soundlibrary", soundIndex);
+    return MENU_SELECTED;
   } 
   // nothing happened
-  return "";
+  return MENU_NONE;
 }
 
 bool freePlayUpdate(){

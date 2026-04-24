@@ -43,6 +43,7 @@ enum State {
 
 State currentState = STATE_POWER_ON;
 String selectedRudiment = "";
+String selectedSound = "";
 int score = 0;
 unsigned long expectedBeatTime = 0;
 int leadInCount = 0;
@@ -62,12 +63,12 @@ void setup() {
   //LCD_Clear(BLACK);
     Serial.println("clear started");
 
-  LCD_Clear(0xF800);
-  Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLACK);
-  Paint_Clear(BLACK);
+  //LCD_Clear(0xF800);
+  Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, ROTATE_90, BLACK);
+  //Paint_Clear(BLACK);
   // test
-  Paint_DrawString_EN(10, 10, "BeatMaster+", &Font24, WHITE, WHITE);
-  Paint_DrawString_EN(0, 32, "LCD working!", &Font16, WHITE, WHITE);
+  //Paint_DrawString_EN(10, 10, "BeatMaster+", &Font24, WHITE, WHITE);
+  //Paint_DrawString_EN(0, 32, "LCD working!", &Font16, WHITE, WHITE);
 
 
   // // LCD
@@ -79,7 +80,7 @@ void setup() {
 
   // // modules
   // sdInit();
-  // menuInit();
+  menuInit();
   // controlsInit();
   // hitDetectionInit();
   // setupLedStrip();
@@ -91,66 +92,85 @@ void setup() {
 
 }
 
+State lastState = STATE_POWER_ON;
+MenuOption lastOption = FREE_PLAY;
+bool lastMetronomeOn = false;
+int lastRudimentIndex = 0;
+int lastSoundIndex = 0;
 
 void loop() {
-  static bool screenInitialized = false;
-  if(!screenInitialized) {
-    Serial.print("Initializing screen in Loop\n");
-    Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLUE);
-    digitalWrite(DEV_BL_PIN, HIGH);
-    delay(1000);
-    screenInitialized = true;
-  }
-  Paint_Clear(GREEN);
-  // controlsUpdate();
-  Serial.print("We Loopin\n");
+  // static bool screenInitialized = false;
+  // if(!screenInitialized) {
+  //   Serial.print("Initializing screen in Loop\n");
+  //   Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLUE);
+  //   digitalWrite(DEV_BL_PIN, HIGH);
+  //   delay(1000);
+  //   screenInitialized = true;
+  // }
+  // Paint_Clear(GREEN);
+  // // controlsUpdate();
+  // Serial.print("We Loopin\n");
 
+bool needsRedraw = (currentState != lastState) 
+                || (currentOption != lastOption) 
+                || (metronomeOn != lastMetronomeOn)
+                || (rudimentIndex != lastRudimentIndex)
+                || (soundIndex != lastSoundIndex);
+lastState = currentState;
+lastOption = currentOption;
+lastMetronomeOn = metronomeOn;
+lastRudimentIndex = rudimentIndex;
+lastSoundIndex = soundIndex;
 
 
   switch (currentState) {
 
     case STATE_POWER_ON:
     Serial.print("Current State: Power On\n");
-     Paint_Clear(BLACK);
+    
+        LCD_Clear(0xF800); // red
+        Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
      Paint_DrawString_EN(0, 100, "BeatMaster+", &Font24, WHITE, BLACK);
+    
      delay(2000);
      currentState = STATE_MAIN_MENU;
      break;
 
      case STATE_MAIN_MENU: {
       Serial.print("Current State: Menu\n");
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Select Mode:", &Font16, GREEN, BLACK);
-      Paint_DrawString_EN(0, 32, currentOption == FREE_PLAY ? "> Free Play" : "  Free Play", &Font16, GREEN, BLACK);
-      Paint_DrawString_EN(0, 48, currentOption == RUDIMENTS ? "> Rudiments" : "  Rudiments", &Font16, WHITE, WHITE);
-      Paint_DrawString_EN(0, 64, currentOption == SOUND_LIBRARY ? "> Sound Library" : "  Sound Library", &Font16, WHITE, WHITE);
-      Paint_DrawCircle(0, 100, 10)
+      if (needsRedraw) {
+          LCD_Clear(0xF800); // red
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
+      Paint_DrawString_EN(0, 0, "Select Mode:", &Font16, GREEN, WHITE);
+      Paint_DrawString_EN(0, 32, currentOption == FREE_PLAY ? "> Free Play" : "  Free Play", &Font16, GREEN, WHITE);
+      Paint_DrawString_EN(0, 48, currentOption == RUDIMENTS ? "> Rudiments" : "  Rudiments", &Font16, GREEN, WHITE);
+      Paint_DrawString_EN(0, 64, currentOption == SOUND_LIBRARY ? "> Sound Library" : "  Sound Library", &Font16, GREEN, WHITE);
+      }
       
-      delay(3000);
-      // MenuOption selected = menuUpdate();
-      // if (selected == FREE_PLAY) currentState = STATE_FREE_PLAY;
-      // if (selected == RUDIMENTS) currentState = STATE_RUDIMENT_SELECT;
-      // if (selected == SOUND_LIBRARY) currentState = STATE_SOUND_LIBRARY;
-      // TESTING PURPOSES ONLY
-      currentState = STATE_FREE_PLAY;
+      MenuOption selected = menuUpdate();
+      if (selected == FREE_PLAY) currentState = STATE_FREE_PLAY;
+      if (selected == RUDIMENTS) currentState = STATE_RUDIMENT_SELECT;
+      if (selected == SOUND_LIBRARY) currentState = STATE_SOUND_LIBRARY;
       break;
     }
 
-    case STATE_FREE_PLAY:
+    case STATE_FREE_PLAY: 
       Serial.print("Current State: Freeplay\n");
-      Paint_Clear(LIGHTBLUE);
-      Paint_DrawString_EN(0, 0, "Free Play", &Font16, LIGHTBLUE, BLACK);
-      Paint_DrawString_EN(0, 32, metronomeOn ? "Metronome: ON" : "Metronome: OFF", &Font16, LIGHTBLUE, BLACK);
-      Paint_DrawString_EN(0, 48, "Click: toggle metro", &Font16, LIGHTBLUE, BLACK);
-      Paint_DrawString_EN(0, 64, "Left: exit", &Font16, LIGHTBLUE, BLACK);
-      delay(1000);
+      if (needsRedraw) {
+          LCD_Clear(LIGHTBLUE); // blue
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0x001F);
+      Paint_DrawString_EN(0, 0, "Free Play", &Font16, LIGHTBLUE, WHITE);
+      Paint_DrawString_EN(0, 32, "Click to toggle metronome", &Font16, LIGHTBLUE, WHITE);
+      Paint_DrawString_EN(0, 48, metronomeOn ? "Metronome: ON" : "Metronome: OFF", &Font16, LIGHTBLUE, WHITE);
+      Paint_DrawString_EN(0, 64, "Left: exit", &Font16, LIGHTBLUE, WHITE);
+      }
       metro.setBeatsPerMinute(currentBPM);
       if (metronomeOn) metro.check();
       readSensor();
       if (hitAvailable()) {
-        // just show intensity, no scoring in free play
         showIntensity(peakValue);
-      }
+        }
+
       if (!freePlayUpdate()) {
         metro.stop();
         metronomeOn = false;
@@ -158,33 +178,64 @@ void loop() {
         currentState = STATE_MAIN_MENU;
       }
       break;
+  
 
     case STATE_RUDIMENT_SELECT: {
       Serial.print("Current State: Rudiment Select\n");
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Select Rudiment:", &Font16, WHITE, BLACK);
-      int count = getFileCount("/rudiments");
-      for (int i = 0; i < count; i++) {
-        String name = getFileName("/rudiments", i);
-        String line = (i == rudimentIndex ? "> " : "  ") + name;
-        Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, WHITE, BLACK);
+        // replace these two lines w: 
+        // int count = getFileCount("/rudiments");
+      String fakeList[] = {"Paradiddle", "Flam", "Single Stroke", "Double Stroke"};
+      int count = 4;
+
+      if (needsRedraw) {
+        LCD_Clear(0x07E0); // green
+        Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0x07E0);
+        Paint_DrawString_EN(0, 0, "Select Rudiment:", &Font16, GREEN, WHITE);
+
+          for (int i = 0; i < count; i++) {
+            String line = (i == rudimentIndex ? "> " : "  ") + fakeList[i];
+            Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, 0x07E0, WHITE);
+          }
       }
-      String result = RudimentMenuUpdate();
-      if (result != "") {
-        selectedRudiment = result;
+      // move the lines below into the if brackets
+      // 
+      // for (int i = 0; i < count; i++) {
+      //   String name = getFileName("/rudiments", i);
+      //   String line = (i == rudimentIndex ? "> " : "  ") + name;
+      //   Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, WHITE, BLACK);
+      // }
+
+      MenuResult result = RudimentMenuUpdate();
+      // if (menuWentBack) {
+      //   menuWentBack = false;
+      //   currentState = STATE_MAIN_MENU;
+      // }
+
+      // if (result != "") {
+      //   //selectedRudiment = result;
+      //   selectedRudiment = fakeList[rudimentIndex];
+      //   currentState = STATE_TEMPO_SET;
+      // }
+
+      if (result == MENU_BACK) currentState = STATE_MAIN_MENU;
+      if (result == MENU_SELECTED) {
+        selectedRudiment = lastSelectedRudiment;
         currentState = STATE_TEMPO_SET;
       }
       break;
     }
 
     case STATE_TEMPO_SET: {
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Set Tempo:", &Font16, WHITE, BLACK);
+    if (needsRedraw) {
+          LCD_Clear(0xF800); // red
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
+      Paint_DrawString_EN(0, 0, "Set Tempo:", &Font16, RED, WHITE);
+    }
       char bpmStr[10];
       sprintf(bpmStr, "%d BPM", currentBPM);
-      Paint_DrawString_EN(0, 32, bpmStr, &Font24, WHITE, BLACK);
-      Paint_DrawString_EN(0, 100, "Click to confirm", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 116, "Left to go back", &Font16, WHITE, BLACK);
+      Paint_DrawString_EN(0, 32, bpmStr, &Font24, RED, WHITE);
+      Paint_DrawString_EN(0, 100, "Click to confirm", &Font16, RED, WHITE);
+      Paint_DrawString_EN(0, 116, "Left to go back", &Font16, RED, WHITE);
       TempoResult result = tempoUpdate();
       if (result == TEMPO_CONFIRMED) currentState = STATE_RUDIMENT_PREVIEW;
       if (result == TEMPO_BACK) currentState = STATE_RUDIMENT_SELECT;
@@ -192,23 +243,28 @@ void loop() {
     }
 
     case STATE_RUDIMENT_PREVIEW:
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Listen:", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 16, selectedRudiment.c_str(), &Font16, WHITE, BLACK);
+    if (needsRedraw) {
+          LCD_Clear(0xF800);
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
+      Paint_DrawString_EN(0, 0, "Listen:", &Font16, RED, WHITE);
+      Paint_DrawString_EN(0, 16, selectedRudiment.c_str(), &Font16, RED, WHITE);
+    }
       // TODO: audio partner plays the file here
       // when audio done → automatically move on
+      delay(2000);
       currentState = STATE_RUDIMENT_LEADIN;
       break;
 
     case STATE_RUDIMENT_LEADIN: {
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Get Ready...", &Font16, WHITE, BLACK);
+      if (needsRedraw) {
+          LCD_Clear(RED);
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
+      Paint_DrawString_EN(0, 0, "Get Ready...", &Font16, RED, WHITE);
+      }
       metro.setBeatsPerMinute(lockedBPM);
       metro.start();
       // count 4 beats then start
-      if (metro.beat()) {
-        leadInCount++;
-      }
+      if (metro.beat()) leadInCount++;
       if (leadInCount >= 4) {
         leadInCount = 0;
         scoringInit();
@@ -225,16 +281,16 @@ void loop() {
       unsigned long remaining = (EXERCISE_LENGTH - elapsed) / 1000;
       char timerStr[10];
       sprintf(timerStr, "%lu sec", remaining);
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, timerStr, &Font24, WHITE, BLACK);
-      Paint_DrawString_EN(0, 60, "Click: STOP", &Font16, WHITE, BLACK);
-
-      metro.check();
-
-      // track expected beat time
-      if (metro.beat()) {
-        expectedBeatTime = millis();
+      
+      if (needsRedraw) {
+          LCD_Clear(0xF800);
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, RED);
+      Paint_DrawString_EN(0, 0, timerStr, &Font24, RED, WHITE);
+      Paint_DrawString_EN(0, 60, "Click: STOP", &Font16, RED, WHITE);
       }
+      metro.check();
+      // track expected beat time
+      if (metro.beat()) expectedBeatTime = millis();
 
       readSensor();
       if (hitAvailable()) {
@@ -270,12 +326,15 @@ void loop() {
     }
 
     case STATE_RESULTS: {
-      Paint_Clear(BLACK);
       char scoreStr[20];
       sprintf(scoreStr, "Score: %d%%", score);
-      Paint_DrawString_EN(0, 0, scoreStr, &Font24, WHITE, BLACK);
-      Paint_DrawString_EN(0, 60, currentOption == 0 ? "> Try Again" : "  Try Again", &Font16, WHITE, BLACK);
-      Paint_DrawString_EN(0, 76, currentOption == 1 ? "> Exit" : "  Exit", &Font16, WHITE, BLACK);
+      if (needsRedraw) {
+          LCD_Clear(0xF800);
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
+      Paint_DrawString_EN(0, 0, scoreStr, &Font24, RED, WHITE);
+      Paint_DrawString_EN(0, 60, currentOption == 0 ? "> Try Again" : "  Try Again", &Font16, RED, WHITE);
+      Paint_DrawString_EN(0, 76, currentOption == 1 ? "> Exit" : "  Exit", &Font16, RED, WHITE);
+      }
       MenuOption selected = menuUpdate();
       if (selected != NONE) {
         if (currentOption == 0) currentState = STATE_TEMPO_SET;
@@ -285,16 +344,39 @@ void loop() {
     }
 
     case STATE_SOUND_LIBRARY: {
-      Paint_Clear(BLACK);
-      Paint_DrawString_EN(0, 0, "Sound Library:", &Font16, WHITE, BLACK);
-      int count = getFileCount("/soundlibrary");
-      for (int i = 0; i < count; i++) {
-        String name = getFileName("/soundlibrary", i);
-        String line = (i == activeSound ? "* " : "  ") + name;
-        Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, WHITE, BLACK);
+      if (needsRedraw) {
+          LCD_Clear(0x780F); // purple
+          Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0x780F);
+      Paint_DrawString_EN(0, 0, "Sound Library:", &Font16, 0x780F, WHITE);
       }
-      String result = SoundMenuUpdate();
-      if (result != "") currentState = STATE_MAIN_MENU;
+      // int count = getFileCount("/soundlibrary");
+      // for (int i = 0; i < count; i++) {
+      //   String name = getFileName("/soundlibrary", i);
+      //   String line = (i == activeSound ? "* " : "  ") + name;
+      //   Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, WHITE, BLACK);
+      // }
+  String fakeSounds[] = {"Snare", "Kick", "Hi-Hat", "Tom"};
+      int count = 4;
+      for (int i = 0; i < count; i++) {
+        String line = (i == activeSound ? "* " : "  ") + fakeSounds[i];
+        Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, 0x780F, WHITE);
+      }
+
+
+      MenuResult result = SoundMenuUpdate();
+      // if (menuWentBack) {
+      //   menuWentBack = false;
+      //   currentState = STATE_MAIN_MENU;
+      // }
+
+      // if (result != "") currentState = STATE_MAIN_MENU;
+      
+      if (result == MENU_BACK) currentState = STATE_MAIN_MENU;
+      if (result == MENU_SELECTED) {
+        selectedSound = lastSelectedSound;
+        currentState = STATE_TEMPO_SET;
+      }
+
       break;
     }
   }

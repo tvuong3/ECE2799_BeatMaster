@@ -16,18 +16,27 @@ enum MenuOption {
   SOUND_LIBRARY
 };
 
+enum MenuResult {
+  MENU_NONE,
+  MENU_SELECTED,
+  MENU_BACK
+};
+
 // variables
 extern MenuOption currentOption;
 extern int rudimentIndex;
 extern int soundIndex;
 extern int activeSound;
 extern bool metronomeOn;
+//extern bool menuWentBack;
+extern String lastSelectedRudiment;
+extern String lastSelectedSound;
 
 // functions
 void menuInit();
 MenuOption menuUpdate();
-String RudimentMenuUpdate();
-String SoundMenuUpdate();
+MenuResult RudimentMenuUpdate();
+MenuResult SoundMenuUpdate();
 bool freePlayUpdate();
 
 // tempo options
