@@ -77,11 +77,13 @@ class Metronome
   //  check must be called every millisecond for timing.
   void check()
   {
+  _justBeat = false;
     if (_run)
     {
       uint32_t now = micros();
       if (now - _last >= _interval)
       {
+      _justBeat = true;
          _last = now;
          _count++;
          _tick = (_tick == LOW) ? HIGH : LOW;
@@ -107,12 +109,15 @@ class Metronome
     }
   };
 
+// bool beat() {
+//   uint32_t now = micros();
+//   if (_run && now - _last >= _interval) {
+//     return true;
+//   }
+//   return false;
+// }
 bool beat() {
-  uint32_t now = micros();
-  if (_run && now - _last >= _interval) {
-    return true;
-  }
-  return false;
+  return _justBeat;
 }
 
 private:
@@ -125,6 +130,9 @@ private:
   uint32_t _last;
   uint32_t _interval;
   uint8_t  _tick;
+
+bool _justBeat = false;
+
 };
 
 
