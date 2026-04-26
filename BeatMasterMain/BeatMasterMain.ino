@@ -5,7 +5,6 @@
 #include "LEDfeedback.h"
 #include "Scoring.h"
 #include "metronome.h"
-#include "Rudiments.h"
 #include "LCD_Driver.h"
 #include "GUI_Paint.h"
 #include <SPI.h>
@@ -15,6 +14,18 @@
 #define LED_STRIP_PIN 99
 #define LED_RING_PIN 99
 #define SPEAKER_PIN  99
+
+// Default SPI Mapping for HSPI, VSPI
+// VSPI used for audio files
+#define VSPI_COPI_PIN 23  // GPIO 23
+#define VSPI_CIPO_PIN 19  // GPIO 19
+#define VSPI_CLK_PIN 18   // GPIO 18
+#define VSPI_CS_PIN 5     // GPIO 5
+//HSPI used for drawing screen
+#define HSPI_COPI_PIN 13  // GPIO 13
+#define HSPI_CIPO_PIN 12  // GPIO 12
+#define HSPI_CLK_PIN 14   // GPIO 14
+#define HSPI_CS_PIN 15    // GPIO 15
 
 //led strip driver
 //#define DATA_PIN 2
@@ -80,7 +91,7 @@ void setup() {
   // Paint_Clear(BLACK);
 
   // // modules
-  // sdInit();
+  SPIClass* vspi = sdInit(VSPI_CLK_PIN, VSPI_CIPO_PIN, VSPI_COPI_PIN, VSPI_CS_PIN);
   menuInit();
   // controlsInit();
   // hitDetectionInit();
@@ -194,10 +205,8 @@ if (stateChanged){
       Serial.print("Current State: Rudiment Select\n");
         // replace these two lines w: 
         // int count = getFileCount("/rudiments");
-      //String fakeList[] = {"Paradiddle", "Flam", "Single Stroke", "Double Stroke"};
-      int count = getRudimentCount();
-      
-
+      String fakeList[] = {"Paradiddle", "Flam", "Single Stroke", "Double Stroke"};
+      int count = 4;
 
       if (needsRedraw) {
         LCD_Clear(0x07E0); // green
@@ -205,8 +214,7 @@ if (stateChanged){
         Paint_DrawString_EN(0, 0, "Select Rudiment:", &Font16, GREEN, WHITE);
 
           for (int i = 0; i < count; i++) {
-            const Rudiment* r = getRudiment(rudimentIndex);
-            String line = (i == rudimentIndex ? "> " : "  ") + String(r->name);
+            String line = (i == rudimentIndex ? "> " : "  ") + fakeList[i];
             Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, 0x07E0, WHITE);
           }
       }
@@ -232,10 +240,7 @@ if (stateChanged){
 
       if (result == MENU_BACK) currentState = STATE_MAIN_MENU;
       if (result == MENU_SELECTED) {
-        const Rudiment* r = getRudiment(rudimentIndex);
-        currentPattern = r->pattern;
-        patternLength = r->length;
-        selectedRudiment = r->name;
+        selectedRudiment = lastSelectedRudiment;
         currentState = STATE_TEMPO_SET;
       }
       break;
@@ -288,7 +293,8 @@ if (stateChanged){
         //  metro.setBeatsPerMinute(lockedBPM);
         //  metro.start();
         leadInCount = 0;
-        scoringInit(lockedBPM);
+        // This doesn't have enough arguments or something funky
+        // scoringInit();
         exerciseStartTime = millis();
         exerciseRun = true;
         currentState = STATE_RUDIMENT_PRACTICE;
@@ -344,15 +350,15 @@ if (stateChanged){
         // }
         
       metro.check();
-      updateMissedNotes();
       // track expected beat time
-      //if (metro.beat()) expectedBeatTime = millis();
+      if (metro.beat()) expectedBeatTime = millis();
 
       readSensor();
       if (hitAvailable()) {
-        unsigned long expectedTime = patternStartTime + currentPattern[currentNoteIndex].step * subdivisionMs;
-        long error = (long)latestHit.timestamp - (long)expectedTime;
-        processHit(latestHit.timestamp, latestHit.force);
+
+        // This has too many arguments or something? I think I have the wrong version of some of the header files - Matt
+        // processHit(latestHit.timestamp, latestHit.force, expectedBeatTime);
+        long error = (long)latestHit.timestamp - (long)expectedBeatTime;
         showAccuracy(error);
         showIntensity(latestHit.force);
       }
@@ -369,7 +375,8 @@ if (stateChanged){
       if (digitalRead(JOY_SW) == LOW) {
         metro.stop();
         clearFeedback();
-        scoringInit(lockedBPM);
+        // Too few arguments again from poor version control
+        // scoringInit();
         currentState = STATE_RUDIMENT_SELECT;
       }
 
@@ -464,19 +471,12 @@ if (stateChanged){
           Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0x780F);
       Paint_DrawString_EN(0, 0, "Sound Library:", &Font16, 0x780F, WHITE);
       }
-      // int count = getFileCount("/soundlibrary");
-      // for (int i = 0; i < count; i++) {
-      //   String name = getFileName("/soundlibrary", i);
-      //   String line = (i == activeSound ? "* " : "  ") + name;
-      //   Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, WHITE, BLACK);
-      // }
-  String fakeSounds[] = {"Snare", "Kick", "Hi-Hat", "Tom"};
-      int count = 4;
+      int count = getFileCount("/sound_library");
       for (int i = 0; i < count; i++) {
-        String line = (i == activeSound ? "* " : "  ") + fakeSounds[i];
+        String name = getFileName("/sound_library", i);
+        String line = (i == activeSound ? "* " : "  ") + name;
         Paint_DrawString_EN(0, 16 + i * 16, line.c_str(), &Font16, 0x780F, WHITE);
       }
-
 
       MenuResult result = SoundMenuUpdate();
       // if (menuWentBack) {

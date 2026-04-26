@@ -61,6 +61,13 @@
 #define DEV_RST_PIN 26
 #define DEV_BL_PIN 25
 
+//HSPI used for drawing screen
+#define HSPI_COPI_PIN 13  // GPIO 13
+#define HSPI_CIPO_PIN 12  // GPIO 12
+#define HSPI_CLK_PIN 14   // GPIO 14
+#define HSPI_CS_PIN 15    // GPIO 15
+extern SPIClass* hspi;
+
 
 /**
  * GPIO read and write
@@ -72,7 +79,7 @@
 /**
  * SPI
 **/
-#define DEV_SPI_WRITE(_dat)   SPI.transfer(_dat)
+#define DEV_SPI_WRITE(_dat)   hspi->transfer(_dat)
 
 /**
  * delay x ms

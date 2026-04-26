@@ -2,12 +2,17 @@
 #include "SDreader.h"
 
 // sets up SD card once at startup
-void sdInit() {
-  if (!SD.begin(SD_PIN)) {
+SPIClass* sdInit(int clkPin, int cipoPin, int copiPin, int csPin) {
+
+  SPIClass *vspi = new SPIClass(VSPI);
+  vspi->begin(clkPin, cipoPin, copiPin, csPin);
+  if(!SD.begin(csPin, *vspi, 40000000)) {
     Serial.println("SD card failed to initialize.");
-    return;
+    return NULL;
   }
+
   Serial.println("SD card initialized.");
+  return vspi;
 }
 
 // returns how many files are in a folder
@@ -28,6 +33,7 @@ int getFileCount(const char* inputPath){
     file = folder.openNextFile();
   }
   return count;
+  folder.close();
 }
 
 
@@ -50,4 +56,5 @@ String getFileName(const char* inputPath, int index){
     file = folder.openNextFile();
   }
   return file.name();
+  folder.close();
 }

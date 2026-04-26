@@ -2,11 +2,10 @@
 #define SDREADER_H
 
 #include <Arduino.h>
+#include <SPI.h>
+#include <SD.h>
 
-#define SD_PIN 5
-#define MAX_FILES 20
-
-void sdInit();
+SPIClass* sdInit(int clkPin, int cipoPin, int copiPin, int csPin);
 int getFileCount(const char* inputPath);
 String getFileName(const char* inputPath, int index);
 

@@ -31,6 +31,9 @@
 ******************************************************************************/
 #include "DEV_Config.h"
 #include <Arduino.h>
+
+SPIClass *hspi = nullptr;
+
 void GPIO_Init()
 {
   pinMode(DEV_CS_PIN, OUTPUT);
@@ -53,6 +56,7 @@ void GPIO_Init()
   // SPI.setBitOrder(MSBFIRST);
   // SPI.setClockDivider(SPI_CLOCK_DIV2);
   // SPI.begin();
-  SPI.begin(18, -1, 23, DEV_CS_PIN);
-  SPI.setFrequency(80000000);
+  hspi = new SPIClass(HSPI);
+  hspi->begin(HSPI_CLK_PIN, HSPI_CIPO_PIN, HSPI_COPI_PIN, HSPI_CS_PIN);
+  hspi->setFrequency(80000000);
 }
