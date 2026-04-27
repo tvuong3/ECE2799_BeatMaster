@@ -9,7 +9,7 @@ const RudimentNote singleStroke[] = {
 
 // Double Stroke (R R L L)
 const RudimentNote doubleStroke[] = {
-  {0, false}, {0, false}, {2, false}, {2, false}
+  {0, false}, {1, false}, {2, false}, {3, false}
 };
 
 // Paradiddle (R L R R L R L L)

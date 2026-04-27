@@ -11,11 +11,17 @@
 #define RING_LATCH_PIN 6  // replace later
 #define RING_OE_PIN 7     // replace later
 
+enum HitFeedback {
+  FEEDBACK_TIMED,
+  FEEDBACK_EXTRA,
+  FEEDBACK_MISSED
+};
+
 extern unsigned long lastFeedbackTime;
 
 void setupLedStrip();
 void setupRing();
-void showAccuracy(long error);
+void showAccuracy(long error, HitFeedback type = FEEDBACK_TIMED);
 void showIntensity(int peakValue);
 void clearFeedback();
 

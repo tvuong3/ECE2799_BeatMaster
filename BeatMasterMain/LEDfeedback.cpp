@@ -16,13 +16,13 @@ void writeAccuracyStrip(byte pattern) {
 }
 
 int getAccuracy(long error) {
-  if (error < -120) return 0;
-  else if (error < -60) return 1;
-  else if (error < -30) return 2;
-  else if (error <= 30) return 3;
-  else if (error <= 60) return 4;
-  else if (error <= 120) return 5;
-  else return 6;
+  if (error < -120) return 0; // left red
+  else if (error < -60) return 1; // left yellow 2
+  else if (error < -30) return 2; // left yellow 1
+  else if (error <= 30) return 3; // green
+  else if (error <= 60) return 4; // right yellow 1
+  else if (error <= 120) return 5; // right yellow 2
+  else return 6; // right red
 }
 
 void lightLED(int index) {
@@ -30,9 +30,15 @@ void lightLED(int index) {
   writeAccuracyStrip(pattern);
 }
 
-void showAccuracy(long error) {
+void showAccuracy(long error, HitFeedback type) {
+  if (type == FEEDBACK_EXTRA) {
+    lightLED(0); // left red = extra hit
+  } else if (type == FEEDBACK_MISSED) {
+    lightLED(6); // right red = missed hit
+  } else {
   int index = getAccuracy(error);
   lightLED(index);
+  }
   lastFeedbackTime = millis();
 }
 

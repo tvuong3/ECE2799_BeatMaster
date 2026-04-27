@@ -1,5 +1,6 @@
 #include "Scoring.h"
 #include "Arduino.h"
+#include "LEDfeedback.h"
 #include <stdlib.h>
 
 // HOW THIS WORKS
@@ -8,7 +9,6 @@
 // Rudiment -> says which grid points matter
 // User hit -> compare to the closest grid point
 // Difference -> used to calculate score
-
 
 
 // initialize variables
@@ -35,8 +35,8 @@ void scoringInit(int bpm) {
 }
 
 // process a hit
-void processHit(unsigned long hitTime, int force) {
-  if (currentPattern == nullptr) return;
+HitResult processHit(unsigned long hitTime, int force) {
+  if (currentPattern == nullptr) return HIT_IGNORED;
 
   // expected time of current note
   unsigned long expectedTime = patternStartTime + currentPattern[currentNoteIndex].step * subdivisionMs;
@@ -79,15 +79,19 @@ void processHit(unsigned long hitTime, int force) {
       patternStartTime = millis();
     }
 
-    return; // only returns after a valid match
+    return HIT_GOOD; // only returns after a valid match
 
   }
 
   // case 2: EXTRA HIT
-  if (absError > 120 && absError < 300) { // penalize extra hit, but DO NOT shift the pattern
+  if (absError < 300) { // penalize extra hit, but DO NOT shift the pattern by advancing the index
     correctHits += 0;
     totalHits +=100;
+    return HIT_EXTRA;
   } 
+
+  return HIT_IGNORED;
+
 }   
 
 
@@ -105,7 +109,7 @@ void updateMissedNotes() {
     // case 3: MISSED NOTE missed note penalty
     correctHits += 0;
     totalHits += 100;
-
+    showAccuracy(0, FEEDBACK_MISSED); // right red LED
     // move on WITHOUT requiring a hit to not mess up the pattern
     currentNoteIndex++;
 

@@ -8,6 +8,13 @@ struct RudimentNote {
   bool accent; // is the note accented or not
 };
 
+// define HitResult
+enum HitResult {
+  HIT_GOOD,
+  HIT_EXTRA,
+  HIT_IGNORED  // too far out even for extra hit zone
+};
+
 // variables
 extern int totalHits;
 extern int correctHits;
@@ -33,7 +40,7 @@ const int HIT_WINDOW_MS = 40;
 
 // functions
 void scoringInit(int bpm);
-void processHit(unsigned long hitTime, int force);
+HitResult processHit(unsigned long hitTime, int force);
 void updateMissedNotes();
 int getScore();
 bool exerciseFinished();
