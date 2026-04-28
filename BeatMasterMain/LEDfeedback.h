@@ -1,15 +1,19 @@
 #ifndef LED_FEEDBACK_H
 #define LED_FEEDBACK_H
+#include "led_driver.h"
+
 
 // strip pins
-#define DATA_PIN 2    // replace later
-#define CLOCK_PIN 3   // replace later
-#define LATCH_PIN 4   // replace later
-#define OE_PIN 5      // replace later
+#define STRIP_DATA_PIN 2 // replace later
+#define STRIP_CLOCK_PIN 3 // replace later
+#define STRIP_LATCH_PIN 4 // replace later
+#define STRIP_OE_PIN 5 // replace later
 
 // ring pins
-#define RING_LATCH_PIN 6  // replace later
-#define RING_OE_PIN 7     // replace later
+#define RING_DATA_PIN 6 // replace later
+#define RING_CLOCK_PIN 7 // replace later
+#define RING_LATCH_PIN 8 // replace later
+#define RING_OE_PIN 9 // replace later
 
 enum HitFeedback {
   FEEDBACK_TIMED,
