@@ -1,8 +1,8 @@
 #include "Controls.h"
 #include <Arduino.h>
 
-#define DRUM_VOL_PIN 26
-#define METRO_VOL_PIN 25
+#define DRUM_VOL_PIN 36
+#define METRO_VOL_PIN 39
 
 // define variables
 int drumVolume = 0;

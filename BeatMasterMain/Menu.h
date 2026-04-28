@@ -22,6 +22,12 @@ enum MenuResult {
   MENU_BACK
 };
 
+enum FreePlayResult {
+  FREEPLAY_CONTINUE,
+  FREEPLAY_EXIT,
+  FREEPLAY_SET_TEMPO
+};
+
 // variables
 extern MenuOption currentOption;
 extern int rudimentIndex;
@@ -37,7 +43,8 @@ void menuInit();
 MenuOption menuUpdate();
 MenuResult RudimentMenuUpdate();
 MenuResult SoundMenuUpdate();
-bool freePlayUpdate();
+// bool freePlayUpdate();
+FreePlayResult freePlayUpdate();
 
 // tempo options
 enum TempoResult {
