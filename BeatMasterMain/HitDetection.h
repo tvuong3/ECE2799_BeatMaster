@@ -1,7 +1,7 @@
 #ifndef HIT_DETECTION_H
 #define HIT_DETECTION_H
 
-#define PIEZO_PIN 99 // replace later
+#define PIEZO_PIN 36 // replace later
 
 struct Hit {
   unsigned long timestamp;
@@ -9,12 +9,14 @@ struct Hit {
 };
 
 // variables
-Hit latestHit;
+//extern Hit latestHit;
 
 // functions
 void hitDetectionInit();
-void readSensor();
-bool hitAvailable();
+Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTill);
+
+//void readSensor();
+//bool hitAvailable();
 
 #endif
 

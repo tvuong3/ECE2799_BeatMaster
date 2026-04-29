@@ -23,6 +23,9 @@ enum HitFeedback {
 
 extern unsigned long lastFeedbackTime;
 
+extern LED_Driver* strip;
+extern LED_Driver* ring;
+
 void setupLedStrip();
 void setupRing();
 void showAccuracy(long error, HitFeedback type = FEEDBACK_TIMED);

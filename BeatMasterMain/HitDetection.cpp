@@ -1,6 +1,7 @@
 #include "HitDetection.h"
 #include "Arduino.h"
 
+
 // how hard you need to hit before it counts as a "hit". filters out background noise
 const int hitThreshold = 100; // replace with tested value
 // min time btwn hits, prevents one hit from being registered twice
@@ -39,7 +40,9 @@ Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTil
     if(recordedVoltage > thresholdVoltage) {
       timeStamp = millis();
       passedThreshold = true;
+      break;
     }
+    delay(0);
   }
   recordedHit.voltage = recordedVoltage;
   recordedHit.timestamp = timeStamp;

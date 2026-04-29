@@ -1,7 +1,7 @@
 #include "Menu.h"
 #include "SDReader.h"
 #include "Controls.h"
-#include "HitDetection.h"
+//#include "HitDetection.h"
 #include "LEDfeedback.h"
 #include "Scoring.h"
 #include "metronome.h"
@@ -9,11 +9,11 @@
 #include "LCD_Driver.h"
 #include "led_driver.h"
 #include "GUI_Paint.h"
-#include "AudioReader.h"
+//#include "AudioReader.h"
 #include <SPI.h>
 
 // pin assignments
-#define PIEZO_PIN 14
+//#define PIEZO_PIN 14
 #define LED_STRIP_PIN 99
 #define LED_RING_PIN 99
 #define SPEAKER_PIN  99
@@ -96,6 +96,9 @@ void setup() {
 
   // // modules
   // sdInit();
+  
+  
+  
   SPIClass* vspi = sdInit(VSPI_CLK_PIN, VSPI_CIPO_PIN, VSPI_COPI_PIN, VSPI_CS_PIN);
   menuInit();
   // controlsInit();
@@ -179,10 +182,10 @@ if (stateChanged){
       Serial.print("Current State: Freeplay\n");
       metro.setBeatsPerMinute(currentBPM);
       if (metronomeOn) metro.check();
-      readSensor();
-      if (hitAvailable()) {
-        showIntensity(latestHit.voltage);
-        }
+      Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
+      if (hit.timestamp > 0) {
+       showIntensity(hit.voltage);
+      }
 
       FreePlayResult fp = freePlayUpdate();
       if (fp == FREEPLAY_EXIT){
@@ -346,6 +349,7 @@ if (stateChanged){
         currentState = STATE_RUDIMENT_PRACTICE;
       }
       break;
+    }
 
     case STATE_RUDIMENT_PRACTICE: {
       // countdown display
@@ -369,23 +373,23 @@ if (stateChanged){
       //if (metro.beat()) expectedBeatTime = millis();
 
       // Waiting for the next hit
-      waitForHit(PIEZO_PIN, 0.5, 0);
-      if (hitAvailable()) {
+      Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
+      if (hit.timestamp > 0) {
         // clearHit();
         unsigned long expectedTime = patternStartTime + currentPattern[currentNoteIndex].step * subdivisionMs;
-        long error = (long)latestHit.timestamp - (long)expectedTime;
-        HitResult result = processHit(latestHit.timestamp, latestHit.voltage);
+        long error = (long)hit.timestamp - (long)expectedTime;
+        int forceADC = (int)(hit.voltage * 4096 / 3.3);
+        HitResult result = processHit(hit.timestamp, forceADC);
         if (result == HIT_GOOD || result == HIT_IGNORED) {
           updateMissedNotes();  // only check for misses if hit didn't land near this note
         }
         if (result == HIT_GOOD) showAccuracy(error, FEEDBACK_TIMED);
         if (result == HIT_EXTRA) showAccuracy(0, FEEDBACK_EXTRA);
-        showIntensity(latestHit.voltage);
-      } else {
+        showIntensity(hit.voltage);
+        } else {
         updateMissedNotes();  // check for missed notes even when no hit
       }
-    }
-
+    
       // clear feedback after duration
       if (lastFeedbackTime > 0 && millis() - lastFeedbackTime >= FEEDBACK_DURATION_MS) {
         clearFeedback();
