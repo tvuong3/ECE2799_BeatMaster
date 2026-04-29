@@ -9,11 +9,7 @@ struct Hit {
 };
 
 // variables
-extern unsigned long lastHitTime;
-extern bool inPeakWindow;
-extern unsigned long peakWindowStart;
-extern int peakValue;
-extern Hit latestHit;
+Hit latestHit;
 
 // functions
 void hitDetectionInit();
@@ -28,7 +24,7 @@ bool hitAvailable();
 
 float getVoltage(int inputPin);
 
-Hit waitForHit(int inputPin, float thresholdVoltage);
+Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTill);
 
 // void setup() {
 //   // put your setup code here, to run once:

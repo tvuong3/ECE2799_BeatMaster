@@ -28,12 +28,13 @@ float getVoltage(int inputPin) {
   return adjustedVoltage;
 }
 
-Hit waitForHit(int inputPin, float thresholdVoltage) {
+Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTill) {
   Hit recordedHit;
   float recordedVoltage = 0;
   bool passedThreshold = false;
   unsigned long timeStamp = 0;
-  while(!passedThreshold) {
+  // Waiting until the next hit is recorded or the time is passed
+  while((!passedThreshold) && millis() < timeToWaitTill) {
     recordedVoltage = getVoltage(inputPin);
     if(recordedVoltage > thresholdVoltage) {
       timeStamp = millis();

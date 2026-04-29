@@ -91,7 +91,7 @@ void showAccuracy(long error, HitFeedback type) {
 
 
 void showIntensity(int peakValue) {
-  int brightness = map(peakValue, 0, 4095, 100, 0);
+  int brightness = map(peakValue, 0, 3.3, 100, 0);
   // maybe 255 instead of 100? 
   //ledcWrite(RING_OE_PIN, brightness);
   ring.setBrightness(brightness);

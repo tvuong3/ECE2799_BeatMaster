@@ -9,6 +9,7 @@
 #include "LCD_Driver.h"
 #include "led_driver.h"
 #include "GUI_Paint.h"
+#include "AudioReader.h"
 #include <SPI.h>
 
 // pin assignments
@@ -180,7 +181,7 @@ if (stateChanged){
       if (metronomeOn) metro.check();
       readSensor();
       if (hitAvailable()) {
-        showIntensity(peakValue);
+        showIntensity(latestHit.voltage);
         }
 
       FreePlayResult fp = freePlayUpdate();
@@ -367,18 +368,19 @@ if (stateChanged){
       // track expected beat time
       //if (metro.beat()) expectedBeatTime = millis();
 
-      readSensor();
+      // Waiting for the next hit
+      waitForHit(PIEZO_PIN, 0.5, 0);
       if (hitAvailable()) {
         // clearHit();
         unsigned long expectedTime = patternStartTime + currentPattern[currentNoteIndex].step * subdivisionMs;
         long error = (long)latestHit.timestamp - (long)expectedTime;
-        HitResult result = processHit(latestHit.timestamp, latestHit.force);
+        HitResult result = processHit(latestHit.timestamp, latestHit.voltage);
         if (result == HIT_GOOD || result == HIT_IGNORED) {
           updateMissedNotes();  // only check for misses if hit didn't land near this note
         }
         if (result == HIT_GOOD) showAccuracy(error, FEEDBACK_TIMED);
         if (result == HIT_EXTRA) showAccuracy(0, FEEDBACK_EXTRA);
-        showIntensity(latestHit.force);
+        showIntensity(latestHit.voltage);
       } else {
         updateMissedNotes();  // check for missed notes even when no hit
       }
