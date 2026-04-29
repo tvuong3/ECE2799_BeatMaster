@@ -10,10 +10,10 @@
 #define STRIP_OE_PIN 5 // replace later
 
 // ring pins
-#define RING_DATA_PIN 6 // replace later
-#define RING_CLOCK_PIN 7 // replace later
-#define RING_LATCH_PIN 8 // replace later
-#define RING_OE_PIN 9 // replace later
+#define RING_DATA_PIN 100 // replace later
+#define RING_CLOCK_PIN 100 // replace later
+#define RING_LATCH_PIN 100 // replace later
+#define RING_OE_PIN 100 // replace later
 
 enum HitFeedback {
   FEEDBACK_TIMED,
@@ -22,9 +22,6 @@ enum HitFeedback {
 };
 
 extern unsigned long lastFeedbackTime;
-
-extern LED_Driver* strip;
-extern LED_Driver* ring;
 
 void setupLedStrip();
 void setupRing();

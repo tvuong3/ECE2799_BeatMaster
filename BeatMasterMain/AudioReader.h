@@ -1,3 +1,6 @@
+#ifndef AUDIOREADER_H
+#define AUDIOREADER_H
+
 #include "ESP_I2S.h"
 #include "FS.h"
 #include "SDReader.h"
@@ -27,5 +30,13 @@ struct WavHeader {
     uint32_t dataSize;
 };
 
+struct AudioRequest {
+    char path[64];
+    float volume;
+};
+
 bool setup_i2s_for_file(uint32_t rate, uint16_t bits, uint16_t channels);
-void play_wav_from_sd(const char* path);
+void audioManagerTask(void* pvParameters);
+void play_wav_from_sd(const char* path, float volume);
+
+#endif

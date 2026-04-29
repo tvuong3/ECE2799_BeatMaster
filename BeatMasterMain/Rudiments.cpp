@@ -1,52 +1,5 @@
 #include "Rudiments.h"
-
-// define all rudiments
-
-// Single Stroke (R L R L)
-const RudimentNote singleStroke[] = {
-  {0, false}, {1, false}, {2, false}, {3, false}
-};
-
-// Double Stroke (R R L L)
-const RudimentNote doubleStroke[] = {
-  {0, false}, {1, false}, {2, false}, {3, false}
-};
-
-// Paradiddle (R L R R L R L L)
-const RudimentNote paradiddle[] = {
-  {0, true}, {1, false}, {2, false}, {3, false},
-  {4, true}, {5, false}, {6, false}, {7, false}
-};
-
-// Flam
-const RudimentNote flam[] {
-  {0, false}, {0, true}
-};
-
-// Flam Tap
-const RudimentNote flamTap[] = {
-  {0, false}, {0, true}, {2, false}, {3, false}
-};
-
-// Paradiddle-Diddle
-const RudimentNote paradiddleDiddle[] = {
-  {0, true}, {1, false}, {2, false},
-  {3, false}, {4, false}, {5, false}
-};
-
-// ==========================
-// LIST
-// ==========================
-const Rudiment rudiments[] = {
-  {"Single Stroke", singleStroke, 4},
-  {"Double Stroke", doubleStroke, 4},
-  {"Paradiddle", paradiddle, 8},
-  {"Flam", flam, 2},
-  {"Flam Tap", flamTap, 4},
-  {"Paradiddle Diddle", paradiddleDiddle, 6}
-};
-
-const int rudimentCount = sizeof(rudiments) / sizeof(Rudiment);
+#include "AudioReader.h"
 
 // ==========================
 const Rudiment* getRudiment(int index) {
@@ -56,4 +9,60 @@ const Rudiment* getRudiment(int index) {
 
 int getRudimentCount() {
   return rudimentCount;
+}
+
+void playRudiment(Rudiment rudiment, int bpm, const char* audioFile) {
+  // Calculate the duration of one 16th note in milliseconds
+  // 60,000 ms / (BPM * 4 steps per beat)
+  float msPerStep = 60000.0 / (bpm * 4.0);
+
+  int lastStep = 0;
+
+  for (int i = 0; i < rudiment.length; i++) {
+    RudimentNote note = rudiment.pattern[i];
+
+    // Calculate delay based on the difference between this step and the last
+    // This allows for non-consecutive notes (rests)
+    if (i > 0) {
+      int stepDifference = note.step - lastStep;
+      if (stepDifference > 0) {
+        delay(stepDifference * msPerStep);
+      }
+    }
+
+    // Handle Volume logic
+    // float baseVol = getVolume(); 
+    float baseVol = 0.1;
+    
+    // Cap base volume at 0.8 to ensure overhead for the 20% accent
+    if (baseVol > 0.5f) baseVol = 0.5f;
+
+    float finalVol;
+    if(note.accent) {
+      finalVol = baseVol + 0.5;
+      Serial.println("This note is accented");
+    } else {
+      finalVol = baseVol;
+    }
+
+    // Trigger the audio
+    play_wav_from_sd(audioFile, finalVol);
+
+    lastStep = note.step;
+  }
+}
+
+Rudiment getRudimentByName(String selectedName) {
+  // Calculate the number of items in the array
+  int totalRudiments = sizeof(rudiments) / sizeof(rudiments[0]);
+
+  for (int i = 0; i < totalRudiments; i++) {
+    // Arduino String objects have an .equals() method for easy comparison
+    if (selectedName.equals(rudiments[i].name)) {
+      return rudiments[i];
+    }
+  }
+
+  // Fallback: return the first rudiment if no match is found
+  return rudiments[0];
 }

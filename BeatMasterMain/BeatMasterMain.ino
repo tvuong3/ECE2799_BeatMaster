@@ -1,7 +1,7 @@
 #include "Menu.h"
 #include "SDReader.h"
 #include "Controls.h"
-//#include "HitDetection.h"
+#include "HitDetection.h"
 #include "LEDfeedback.h"
 #include "Scoring.h"
 #include "metronome.h"
@@ -9,7 +9,7 @@
 #include "LCD_Driver.h"
 #include "led_driver.h"
 #include "GUI_Paint.h"
-//#include "AudioReader.h"
+#include "AudioReader.h"
 #include <SPI.h>
 
 // pin assignments
@@ -42,6 +42,7 @@
 //#define RING_OE_PIN
 
 Metronome metro(SPEAKER_PIN);
+QueueHandle_t audioQueue;
 
 // menu state machine
 enum State {
@@ -59,7 +60,7 @@ enum State {
 
 State currentState = STATE_POWER_ON;
 String selectedRudiment = "";
-String selectedSound = "";
+String selectedSound = "/sound_library/snare_test_2.wav";
 int score = 0;
 unsigned long expectedBeatTime = 0;
 int leadInCount = 0;
@@ -71,13 +72,14 @@ void setup() {
   Serial.println("Setup started");
   // LCD
   Config_Init();
-    Serial.println("config started");
+  Serial.println("Config started");
 
   LCD_Init();
-    Serial.println("init started");
+  Serial.println("Init started");
 
-  //LCD_Clear(BLACK);
-    Serial.println("clear started");
+  // Beginning Audio Queue
+  audioQueue = xQueueCreate(10, sizeof(AudioRequest));
+  xTaskCreatePinnedToCore(audioManagerTask, "AudioMgr", 10240, NULL, 5, NULL, 0);
 
   //LCD_Clear(0xF800);
   Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, ROTATE_90, BLACK);
@@ -182,10 +184,10 @@ if (stateChanged){
       Serial.print("Current State: Freeplay\n");
       metro.setBeatsPerMinute(currentBPM);
       if (metronomeOn) metro.check();
-      Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
-      if (hit.timestamp > 0) {
-       showIntensity(hit.voltage);
-      }
+      // Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
+      // if (hit.timestamp > 0) {
+      //  showIntensity(hit.voltage);
+      // }
 
       FreePlayResult fp = freePlayUpdate();
       if (fp == FREEPLAY_EXIT){
@@ -322,6 +324,8 @@ if (stateChanged){
     }
       // TODO: audio partner plays the file here
       // when audio done → automatically move on
+      Rudiment selected = getRudimentByName(selectedRudiment);
+      playRudiment(selected, 120, selectedSound.c_str());
       delay(2000);
       currentState = STATE_RUDIMENT_LEADIN;
       break;
@@ -370,7 +374,7 @@ if (stateChanged){
         
       metro.check();
       // track expected beat time
-      //if (metro.beat()) expectedBeatTime = millis();
+      if (metro.beat()) expectedBeatTime = millis();
 
       // Waiting for the next hit
       Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
@@ -514,6 +518,8 @@ if (stateChanged){
       if (result == MENU_BACK) currentState = STATE_MAIN_MENU;
       if (result == MENU_SELECTED) {
         selectedSound = lastSelectedSound;
+        Serial.print("Selected Sound: ");
+        Serial.println(selectedSound.c_str());
       }
       break;
     }

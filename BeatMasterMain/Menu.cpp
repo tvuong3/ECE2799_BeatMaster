@@ -94,7 +94,7 @@ MenuResult SoundMenuUpdate(){
   int y = analogRead(JOY_VRY);
   int btn = digitalRead(JOY_SW);
 
-  Serial.print("y: "); Serial.println(y);
+  // Serial.print("y: "); Serial.println(y);
   Serial.print("soundIndex: "); Serial.println(soundIndex);
   Serial.print("getFileCount: "); Serial.println(getFileCount("/sound_library"));
 
