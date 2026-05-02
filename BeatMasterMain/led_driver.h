@@ -15,6 +15,7 @@ class LED_Driver {
     void lightLED(int index);
     void setBrightness(int brightness); // Takes brightness as a percentage
     void testHigh(int pin);
+    void startupSequence();
 };
 
 #endif

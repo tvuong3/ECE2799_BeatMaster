@@ -13,8 +13,12 @@
 #include <SPI.h>
 
 // pin assignments
-//#define PIEZO_PIN 14
-#define LED_STRIP_PIN 99
+// LED Strip Pins
+#define STRIP_SDI_PIN 2
+#define STRIP_CLK_PIN 0
+#define STRIP_LATCH_PIN 4
+#define STRIP_OE_PIN 16
+
 #define LED_RING_PIN 99
 #define SPEAKER_PIN  99
 
@@ -43,6 +47,7 @@
 
 Metronome metro(SPEAKER_PIN);
 QueueHandle_t audioQueue;
+LED_Driver* stripDriver;
 
 // menu state machine
 enum State {
@@ -67,40 +72,27 @@ int leadInCount = 0;
 
 void setup() {
   Serial.begin(115200);
-  // while(!Serial);
-  // delay(5000);
   Serial.println("Setup started");
+  
   // LCD
   Config_Init();
   Serial.println("Config started");
-
   LCD_Init();
   Serial.println("Init started");
+  Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, ROTATE_90, BLACK); 
 
   // Beginning Audio Queue
   audioQueue = xQueueCreate(10, sizeof(AudioRequest));
   xTaskCreatePinnedToCore(audioManagerTask, "AudioMgr", 10240, NULL, 5, NULL, 0);
-
-  //LCD_Clear(0xF800);
-  Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, ROTATE_90, BLACK);
-  //Paint_Clear(BLACK);
-  // test
-  //Paint_DrawString_EN(10, 10, "BeatMaster+", &Font24, WHITE, WHITE);
-  //Paint_DrawString_EN(0, 32, "LCD working!", &Font16, WHITE, WHITE);
-
-
-  // // LCD
-  // Config_Init();
-  // LCD_Init();
-  // LCD_Clear(BLACK);
-  // Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLACK);
-  // Paint_Clear(BLACK);
-
-  // // modules
-  // sdInit();
   
-  
-  
+  stripDriver = new LED_Driver(STRIP_SDI_PIN, STRIP_CLK_PIN, STRIP_LATCH_PIN, STRIP_OE_PIN);
+  // stripDriver->startupSequence();
+  stripDriver->writePattern(0xFF);
+  delay(500);
+  stripDriver->writePattern(0XF0);
+  delay(500);
+  stripDriver->writePattern(0x0F);
+
   SPIClass* vspi = sdInit(VSPI_CLK_PIN, VSPI_CIPO_PIN, VSPI_COPI_PIN, VSPI_CS_PIN);
   menuInit();
   // controlsInit();

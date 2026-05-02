@@ -45,3 +45,25 @@ void LED_Driver::testHigh(int pin) {
   digitalWrite(sdiPin, HIGH);
   digitalWrite(pin, HIGH);
 }
+
+void LED_Driver::startupSequence() {
+  setBrightness(50);
+  lightLED(0);
+  delay(200);
+  lightLED(1);
+  delay(200);
+  lightLED(2);
+  delay(200);
+  lightLED(3);
+  delay(200);
+  lightLED(4);
+  delay(200);
+  lightLED(5);
+  delay(200);
+  lightLED(6);
+  delay(200);
+  lightLED(7);
+  delay(200);
+  // Turning off LEDs
+  // writePattern(0b00000000);
+}
