@@ -85,18 +85,20 @@ void setup() {
   audioQueue = xQueueCreate(10, sizeof(AudioRequest));
   xTaskCreatePinnedToCore(audioManagerTask, "AudioMgr", 10240, NULL, 5, NULL, 0);
   
-  stripDriver = new LED_Driver(STRIP_SDI_PIN, STRIP_CLK_PIN, STRIP_LATCH_PIN, STRIP_OE_PIN);
+
+  // stripDriver = new LED_Driver(STRIP_SDI_PIN, STRIP_CLK_PIN, STRIP_LATCH_PIN, STRIP_OE_PIN);
   // stripDriver->startupSequence();
-  stripDriver->writePattern(0xFF);
-  delay(500);
-  stripDriver->writePattern(0XF0);
-  delay(500);
-  stripDriver->writePattern(0x0F);
+  // stripDriver->writePattern(0xFF);
+  // delay(500);
+  // stripDriver->writePattern(0XF0);
+  // delay(500);
+  // stripDriver->writePattern(0x0F);
 
   SPIClass* vspi = sdInit(VSPI_CLK_PIN, VSPI_CIPO_PIN, VSPI_COPI_PIN, VSPI_CS_PIN);
   menuInit();
+  setupLedStrip();
   // controlsInit();
-  // hitDetectionInit();
+  hitDetectionInit();
   // setupLedStrip();
   // setupRing();
 
@@ -154,7 +156,7 @@ if (stateChanged){
      break;
 
      case STATE_MAIN_MENU: {
-      Serial.print("Current State: Menu\n");
+      // Serial.print("Current State: Menu\n");
       if (needsRedraw) {
           // LCD_Clear(GREEN); // red
           Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
@@ -366,10 +368,17 @@ if (stateChanged){
         
       metro.check();
       // track expected beat time
-      if (metro.beat()) expectedBeatTime = millis();
+      // if (metro.beat()) expectedBeatTime = millis();
+      if (metro.beat()){ // THIS MIGHT BE BREAKING THE SOUND
+        AudioRequest req;
+        strncpy(req.path, "/sounds/snare_test_1.wav", sizeof(req.path));
+        req.volume = 1.0;
+        xQueueSend(audioQueue, &req, 0);
+      }
+
 
       // Waiting for the next hit
-      Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
+      Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 2);
       if (hit.timestamp > 0) {
         // clearHit();
         unsigned long expectedTime = patternStartTime + currentPattern[currentNoteIndex].step * subdivisionMs;

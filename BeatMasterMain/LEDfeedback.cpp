@@ -33,7 +33,8 @@ void lightLEDs(int index) {
 
 
 void startUpTest() {
-  for (int i = 0; i < 7; i++) {
+  strip.setBrightness(50);
+  for (int i = 0; i < 8; i++) {
     lightLEDs(i);
     delay(400);
   }
@@ -45,14 +46,14 @@ void startUpTest() {
 
 // EXTERNAL FUNCTIONS
 
-void setupLedStrip() {
+void setupLedStrip(){
   // pinMode(DATA_PIN, OUTPUT);
   // pinMode(CLOCK_PIN, OUTPUT);
   // pinMode(LATCH_PIN, OUTPUT);
   // pinMode(OE_PIN, OUTPUT);
   // digitalWrite(OE_PIN, LOW);
   startUpTest();
-}
+};
 
 void setupRing() {
   // pinMode(RING_LATCH_PIN, OUTPUT);

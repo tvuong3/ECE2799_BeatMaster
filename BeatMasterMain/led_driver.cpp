@@ -20,7 +20,7 @@ void LED_Driver::writePattern(uint8_t pattern) {
   digitalWrite(latchPin, LOW);
   Serial.print("Latch Set Low\n");
   uint8_t bitVal = 0;
-  for (int i = 8; i > 0; i--){
+  for (int i = 7; i >= 0; i--){
     digitalWrite(clkPin, LOW);
 
     bitVal = (pattern >> i) & 1;
@@ -38,7 +38,9 @@ void LED_Driver::lightLED(int index) {
 
 void LED_Driver::setBrightness(int brightness) {
   // Since Output Enable is active low, need to write the opposite duty cycle
-  analogWrite(oePin, 255 - (brightness * 255 / 100));
+  ledcAttach(oePin, 1000, 8);
+  ledcWrite(oePin, 255 - (brightness * 255 / 100));
+  // analogWrite(oePin, 255 - (brightness * 255 / 100));
 }
 
 void LED_Driver::testHigh(int pin) {
