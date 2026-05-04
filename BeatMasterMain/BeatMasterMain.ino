@@ -177,7 +177,15 @@ if (stateChanged){
     case STATE_FREE_PLAY: {
       Serial.print("Current State: Freeplay\n");
       metro.setBeatsPerMinute(currentBPM);
-      if (metronomeOn) metro.check();
+      if (metronomeOn) {
+        if (!metro.isRunning()) metro.start();
+        metro.check();
+        if (metro.beat()){
+          play_wav_from_sd(selectedSound.c_str(), 1.0);
+        }
+      } else {
+        metro.stop();
+      }
       // Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
       // if (hit.timestamp > 0) {
       //  showIntensity(hit.voltage);
@@ -221,7 +229,10 @@ if (stateChanged){
         lastBPM = -1;
        }
 
-      if (needsRedraw && metronomeOn){
+      // if (needsRedraw && metronomeOn){
+      //   metro.start();
+      // }
+      if(metronomeOn && !metro.isRunning()){
         metro.start();
       }
 
@@ -320,7 +331,7 @@ if (stateChanged){
       // when audio done → automatically move on
       Rudiment selected = getRudimentByName(selectedRudiment);
       playRudiment(selected, 120, selectedSound.c_str());
-      delay(2000);
+      delay(selected.length * (60000 / (120 * 4)) + 500); 
       currentState = STATE_RUDIMENT_LEADIN;
       break;
     }
@@ -351,6 +362,10 @@ if (stateChanged){
 
     case STATE_RUDIMENT_PRACTICE: {
       // countdown display
+      if (stateChanged){
+        metro.setBeatsPerMinute(lockedBPM);
+        metro.start();
+      }
       unsigned long elapsed = millis() - exerciseStartTime;
       unsigned long remaining = (EXERCISE_LENGTH - elapsed) / 1000;
 
@@ -367,14 +382,19 @@ if (stateChanged){
       }
         
       metro.check();
+      if (metro.beat()){
+          Serial.print("Playing metronome sound: ");
+          Serial.println(selectedSound.c_str());
+          play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
+        }
       // track expected beat time
       // if (metro.beat()) expectedBeatTime = millis();
-      if (metro.beat()){ // THIS MIGHT BE BREAKING THE SOUND
-        AudioRequest req;
-        strncpy(req.path, "/sounds/snare_test_1.wav", sizeof(req.path));
-        req.volume = 1.0;
-        xQueueSend(audioQueue, &req, 0);
-      }
+      // if (metro.beat()){ // THIS MIGHT BE BREAKING THE SOUND
+      //   AudioRequest req;
+      //   strncpy(req.path, "/sounds/snare_test_1.wav", sizeof(req.path));
+      //   req.volume = 1.0;
+      //   xQueueSend(audioQueue, &req, 0);
+      // }
 
 
       // Waiting for the next hit
@@ -385,9 +405,9 @@ if (stateChanged){
         long error = (long)hit.timestamp - (long)expectedTime;
         int forceADC = (int)(hit.voltage * 4096 / 3.3);
         HitResult result = processHit(hit.timestamp, forceADC);
-        if (result == HIT_GOOD || result == HIT_IGNORED) {
-          updateMissedNotes();  // only check for misses if hit didn't land near this note
-        }
+        // if (result == HIT_GOOD || result == HIT_IGNORED) {
+        //   updateMissedNotes();  // only check for misses if hit didn't land near this note
+        // }
         if (result == HIT_GOOD) showAccuracy(error, FEEDBACK_TIMED);
         if (result == HIT_EXTRA) showAccuracy(0, FEEDBACK_EXTRA);
         showIntensity(hit.voltage);

@@ -74,6 +74,11 @@ class Metronome
     _count = 0;
   };
 
+  bool isRunning()
+  {
+    return _run;
+  };
+
   //  check must be called every millisecond for timing.
   void check()
   {

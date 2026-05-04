@@ -119,7 +119,8 @@ MenuResult SoundMenuUpdate(){
   if (x > 3000 || btn == LOW) {
     delay(200);
     activeSound = soundIndex;
-    lastSelectedSound = getFileName("/sound_library", soundIndex);
+    // lastSelectedSound = getFileName("/sound_library", soundIndex);
+    lastSelectedSound = "/sound_library/" + getFileName("/sound_library", soundIndex);
     return MENU_SELECTED;
   } 
   // nothing happened

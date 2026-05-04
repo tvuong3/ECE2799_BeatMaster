@@ -1,6 +1,8 @@
 #include "Rudiments.h"
 #include "AudioReader.h"
 
+extern QueueHandle_t audioQueue;
+
 // ==========================
 const Rudiment* getRudiment(int index) {
   if (index < 0 || index >= rudimentCount) return nullptr;
@@ -47,6 +49,11 @@ void playRudiment(Rudiment rudiment, int bpm, const char* audioFile) {
 
     // Trigger the audio
     play_wav_from_sd(audioFile, finalVol);
+
+    // AudioRequest req;
+    // strncpy(req.path, audioFile, sizeof(req.path));
+    // req.volume = finalVol;
+    // xQueueSend(audioQueue, &req, portMAX_DELAY);
 
     lastStep = note.step;
   }
