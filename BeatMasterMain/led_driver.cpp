@@ -18,7 +18,6 @@ LED_Driver::LED_Driver(int sdiPinIn, int clkPinIn, int latchPinIn, int oePinIn =
 
 void LED_Driver::writePattern(uint8_t pattern) {
   digitalWrite(latchPin, LOW);
-  Serial.print("Latch Set Low\n");
   uint8_t bitVal = 0;
   for (int i = 7; i >= 0; i--){
     digitalWrite(clkPin, LOW);
@@ -28,7 +27,6 @@ void LED_Driver::writePattern(uint8_t pattern) {
     digitalWrite(clkPin, HIGH);
   }
   digitalWrite(latchPin, HIGH);
-  Serial.print("Latch Set High\n");
 }
 
 void LED_Driver::lightLED(int index) {

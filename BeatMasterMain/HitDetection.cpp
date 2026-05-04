@@ -3,9 +3,9 @@
 
 
 // how hard you need to hit before it counts as a "hit". filters out background noise
-const int hitThreshold = 100; // replace with tested value
+const int hitThreshold = 300; // replace with tested value
 // min time btwn hits, prevents one hit from being registered twice
-const unsigned long debounce_ms = 50; // replace with tested value
+const unsigned long debounce_ms = 80; // replace with tested value
 // how long after a hit is detected we keep reading to find the peak force value
 const unsigned long peak_window_ms = 20; // replace with tested value
 
@@ -30,6 +30,7 @@ float getVoltage(int inputPin) {
 }
 
 Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTill) {
+  static unsigned long lastHitTime = 0;
   Hit recordedHit;
   float recordedVoltage = 0;
   bool passedThreshold = false;
@@ -38,14 +39,23 @@ Hit waitForHit(int inputPin, float thresholdVoltage, unsigned long timeToWaitTil
   while((!passedThreshold) && millis() < timeToWaitTill) {
     recordedVoltage = getVoltage(inputPin);
     if(recordedVoltage > thresholdVoltage) {
+      if (millis() - lastHitTime > debounce_ms){
       timeStamp = millis();
+      lastHitTime = timeStamp; 
       passedThreshold = true;
       break;
     }
-    delay(0);
+   }
+       delay(0);
   }
   recordedHit.voltage = recordedVoltage;
   recordedHit.timestamp = timeStamp;
+
+  if (millis() > timeToWaitTill) {
+    // Hit never actually came in time
+    // Set timestamp to 0 as an indicator there was no hit
+    recordedHit.timestamp = 0; 
+  } 
   return recordedHit;
 }
 

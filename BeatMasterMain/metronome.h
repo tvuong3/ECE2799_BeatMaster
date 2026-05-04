@@ -23,7 +23,7 @@ class Metronome
     if (_tockPin == 255) _tockPin = _tickPin;
     //  defaults
     _bpm = 100;
-    _measure = 4;
+    _measure = 1;
     _run = false;
     _tick = LOW;
     _count = 0;
@@ -123,6 +123,10 @@ class Metronome
 // }
 bool beat() {
   return _justBeat;
+}
+
+bool isOnBeat(){
+  return _justBeat && _tick == HIGH;
 }
 
 private:

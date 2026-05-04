@@ -8,7 +8,7 @@
 #define I2S_BCLK      17
 #define I2S_LRC       21
 #define I2S_DOUT      22
-#define BUFFER_SIZE   2048
+#define BUFFER_SIZE   4096
 
 extern I2SClass i2s;
 extern float globalVolume;

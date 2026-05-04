@@ -32,7 +32,7 @@ extern int subdivisionMs;
 
 // constants
 const unsigned long EXERCISE_LENGTH = 30000;
-const unsigned long FEEDBACK_DURATION_MS = 500;
+const unsigned long FEEDBACK_DURATION_MS = 150;
 const int HIT_WINDOW_MS = 40;
 // hard vs soft hit threshold for accents (this is the ADC value, not the voltage)
 // NEEDS TO BE CHANGED BASED ON TESTING

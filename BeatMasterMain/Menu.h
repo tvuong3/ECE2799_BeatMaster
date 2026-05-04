@@ -6,7 +6,7 @@
 #define JOY_VRX  34
 #define JOY_VRY  35
 #define JOY_SW 32
-#define TEMPO_PIN 33
+#define TEMPO_PIN 39
 
 // main menu options
 enum MenuOption {
