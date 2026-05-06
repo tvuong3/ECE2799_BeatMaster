@@ -127,24 +127,6 @@ MenuResult SoundMenuUpdate(){
   return MENU_NONE;
 }
 
-// bool freePlayUpdate(){
-//   int x = analogRead(JOY_VRX);
-//   int btn = digitalRead(JOY_SW);
-
-//   // go back
-//   if (x < 1000) {
-//     delay(200);
-//     return false;  
-//   }
-
-//   // metronome toggle
-//   if (btn == LOW) {
-//     delay(200);
-//     metronomeOn = !metronomeOn;
-//   }
-
-//   return true;
-// }
 
 FreePlayResult freePlayUpdate(){
     int x = analogRead(JOY_VRX);

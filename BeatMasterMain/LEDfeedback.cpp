@@ -47,36 +47,8 @@ void startUpTest() {
 // EXTERNAL FUNCTIONS
 
 void setupLedStrip(){
-  // pinMode(DATA_PIN, OUTPUT);
-  // pinMode(CLOCK_PIN, OUTPUT);
-  // pinMode(LATCH_PIN, OUTPUT);
-  // pinMode(OE_PIN, OUTPUT);
-  // digitalWrite(OE_PIN, LOW);
   startUpTest();
 };
-
-void setupRing() {
-  // pinMode(RING_LATCH_PIN, OUTPUT);
-  // pinMode(RING_OE_PIN, OUTPUT);
-  // SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-  // digitalWrite(RING_LATCH_PIN, LOW);
-  // SPI.transfer(0xFF);
-  // digitalWrite(RING_LATCH_PIN, HIGH);
-  // delayMicroseconds(1);
-  // digitalWrite(RING_LATCH_PIN, LOW);
-  // SPI.endTransaction();
-  // ledcAttach(RING_OE_PIN, 1000, 8);
-  // ledcWrite(1, 255);
-
-  // PWM on OE pin controls brightness
-  ledcAttach(RING_OE_PIN, 1000, 8);
-  ledcWrite(RING_OE_PIN, 255); // off initially
-  // enable all 16 LEDs via shift register
-  // two chained chips so write twice
-  ring.writePattern(0xFF);
-  ring.writePattern(0xFF);
-
-}
 
 
 void showAccuracy(long error, HitFeedback type) {
@@ -104,17 +76,6 @@ void clearFeedback() {
   ledcWrite(RING_OE_PIN, 255);
 }
 
-
-// void writeAccuracyStrip(byte pattern) {
-//   digitalWrite(LATCH_PIN, LOW);
-//   for (int i = 7; i >= 0; i--) {
-//     digitalWrite(CLOCK_PIN, LOW);
-//     int bitVal = (pattern >> i) & 1;
-//     digitalWrite(DATA_PIN, bitVal);
-//     digitalWrite(CLOCK_PIN, HIGH);
-//   }
-//   digitalWrite(LATCH_PIN, HIGH);
-// }
 
 
 

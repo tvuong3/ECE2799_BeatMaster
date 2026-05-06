@@ -50,11 +50,6 @@ void playRudiment(Rudiment rudiment, int bpm, const char* audioFile) {
     // Trigger the audio
     play_wav_from_sd(audioFile, finalVol);
 
-    // AudioRequest req;
-    // strncpy(req.path, audioFile, sizeof(req.path));
-    // req.volume = finalVol;
-    // xQueueSend(audioQueue, &req, portMAX_DELAY);
-
     lastStep = note.step;
   }
 }
@@ -64,12 +59,10 @@ Rudiment getRudimentByName(String selectedName) {
   int totalRudiments = sizeof(rudiments) / sizeof(rudiments[0]);
 
   for (int i = 0; i < totalRudiments; i++) {
-    // Arduino String objects have an .equals() method for easy comparison
     if (selectedName.equals(rudiments[i].name)) {
       return rudiments[i];
     }
   }
 
-  // Fallback: return the first rudiment if no match is found
   return rudiments[0];
 }

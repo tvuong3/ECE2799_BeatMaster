@@ -4,16 +4,10 @@
 
 
 // strip pins
-#define STRIP_DATA_PIN 2 // replace later
-#define STRIP_CLOCK_PIN 0 // replace later
-#define STRIP_LATCH_PIN 4 // replace later
-#define STRIP_OE_PIN 16 // replace later
-
-// ring pins
-#define RING_DATA_PIN 100 // replace later
-#define RING_CLOCK_PIN 100 // replace later
-#define RING_LATCH_PIN 100 // replace later
-#define RING_OE_PIN 100 // replace later
+#define STRIP_DATA_PIN 2 
+#define STRIP_CLOCK_PIN 0
+#define STRIP_LATCH_PIN 4 
+#define STRIP_OE_PIN 16 
 
 enum HitFeedback {
   FEEDBACK_TIMED,

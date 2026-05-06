@@ -6,18 +6,12 @@ I2SClass i2s;
 float globalVolume = 0.2;
 extern QueueHandle_t audioQueue;
 
-/**
- * Dynamically configures I2S based on file properties
- */
 bool setup_i2s_for_file(uint32_t rate, uint16_t bits, uint16_t channels) {
     i2s.end();
     delay(50);
     i2s.setPins(I2S_BCLK, I2S_LRC, I2S_DOUT);
     
     i2s_slot_mode_t slot_mode = (channels == 1) ? I2S_SLOT_MODE_MONO : I2S_SLOT_MODE_STEREO;
-    if(slot_mode == I2S_SLOT_MODE_STEREO) {
-        Serial.println("Yeah this shit stereo");
-    }
     
     // bits == 16 typically, but we cast to the driver's enum
     i2s_data_bit_width_t bit_width;

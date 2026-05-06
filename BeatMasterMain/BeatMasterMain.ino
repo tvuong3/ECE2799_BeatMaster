@@ -46,14 +46,7 @@
 #define RING_CLK_PIN STRIP_CLK_PIN
 #define RING_LATCH_PIN 33
 #define RING_OE_PIN -1
-//#define DATA_PIN 2
-//#define CLOCK_PIN 3
-//#define LATCH_PIN 4
-//#define OE_PIN 5
 
-//led ring 
-//#define RING_LATCH_PIN 
-//#define RING_OE_PIN
 
 Metronome metro(SPEAKER_PIN);
 QueueHandle_t audioQueue;
@@ -97,15 +90,9 @@ void setup() {
   xTaskCreatePinnedToCore(audioManagerTask, "AudioMgr", 10240, NULL, 5, NULL, 0);
   
 
-  // stripDriver = new LED_Driver(STRIP_SDI_PIN, STRIP_CLK_PIN, STRIP_LATCH_PIN, STRIP_OE_PIN);
   ringDriver = new LED_Driver(RING_SDI_PIN, RING_CLK_PIN, RING_LATCH_PIN, RING_OE_PIN);
   ringDriver->writePattern(0b11111111);
-  // stripDriver->startupSequence();
-  // stripDriver->writePattern(0xFF);
-  // delay(500);
-  // stripDriver->writePattern(0XF0);
-  // delay(500);
-  // stripDriver->writePattern(0x0F);
+
 
   SPIClass* vspi = sdInit(VSPI_CLK_PIN, VSPI_CIPO_PIN, VSPI_COPI_PIN, VSPI_CS_PIN);
   menuInit();
@@ -133,17 +120,6 @@ unsigned long lastBeatTime = 0;
 State previousState = STATE_MAIN_MENU;
 
 void loop() {
-  // static bool screenInitialized = false;
-  // if(!screenInitialized) {
-  //   Serial.print("Initializing screen in Loop\n");
-  //   Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, BLUE);
-  //   digitalWrite(DEV_BL_PIN, HIGH);
-  //   delay(1000);
-  //   screenInitialized = true;
-  // }
-  // Paint_Clear(GREEN);
-  // // controlsUpdate();
-  // Serial.print("We Loopin\n");
 bool stateChanged = (currentState != lastState);
 
 bool needsRedraw = (currentState != lastState) 
@@ -171,9 +147,7 @@ if (stateChanged){
      break;
 
      case STATE_MAIN_MENU: {
-      // Serial.print("Current State: Menu\n");
       if (needsRedraw) {
-          // LCD_Clear(GREEN); // red
       Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
       Paint_DrawString_EN(0, 0, "Select Mode:", &Font16, RED, WHITE);
       Paint_DrawString_EN(0, 32, currentOption == FREE_PLAY ? "> Free Play" : "  Free Play", &Font16, RED, WHITE);
@@ -200,16 +174,9 @@ if (stateChanged){
          lastBeatTime = millis();
          play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
 }
-        // if (metro.isOnBeat()){
-        //   play_wav_from_sd(selectedSound.c_str(), 1.0);
-        //   }
       } else {
         metro.stop();
-      }
-      // Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 150);
-      // if (hit.timestamp > 0) {
-      //  showIntensity(hit.voltage);
-      // }
+      }  
 
       FreePlayResult fp = freePlayUpdate();
       if (fp == FREEPLAY_EXIT){
@@ -223,14 +190,6 @@ if (stateChanged){
         previousState = STATE_FREE_PLAY;
         currentState = STATE_TEMPO_SET;
       }
-
-      // if (!freePlayUpdate()) {
-      //   metro.stop();
-      //   metronomeOn = false;
-      //   clearFeedback();
-      //   // LCD_Clear(0xF800);
-      //   currentState = STATE_MAIN_MENU;
-      // }
       
        if (needsRedraw) {
           LCD_Clear(LIGHTBLUE); // blue
@@ -249,9 +208,6 @@ if (stateChanged){
         lastBPM = -1;
        }
 
-      // if (needsRedraw && metronomeOn){
-      //   metro.start();
-      // }
       if(metronomeOn && !metro.isRunning()){
         metro.start();
       }
@@ -274,9 +230,6 @@ if (stateChanged){
   
     case STATE_RUDIMENT_SELECT: {
       Serial.print("Current State: Rudiment Select\n");
-        // replace these two lines w: 
-        // int count = getFileCount("/rudiments");
-      //String fakeList[] = {"Paradiddle", "Flam", "Single Stroke", "Double Stroke"};
       int count = getRudimentCount();
       bool listChanged = (rudimentIndex != lastRudimentIndex);
 
@@ -347,8 +300,6 @@ if (stateChanged){
       Paint_DrawString_EN(0, 0, "Listen:", &Font16, RED, WHITE);
       Paint_DrawString_EN(0, 16, selectedRudiment.c_str(), &Font16, RED, WHITE);
     }
-      // TODO: audio partner plays the file here
-      // when audio done → automatically move on
       Rudiment selected = getRudimentByName(selectedRudiment);
       playRudiment(selected, lockedBPM, selectedSound.c_str());
       delay(selected.length * (60000 / (lockedBPM * 4)) + 500); 
@@ -365,30 +316,18 @@ if (stateChanged){
 
          unsigned long beatInterval = 60000UL / lockedBPM;
          const char* counts[] = {"4", "3", "2", "1", "Go!"};
+
+         unsigned long nextBeat = millis();
          for (int i = 0; i < 5; i++){
+          nextBeat += beatInterval;
+          
           Paint_DrawRectangle (0, 40, 60, 70, RED, DOT_PIXEL_1X1, DRAW_FILL_FULL);
           Paint_DrawString_EN(0, 40, counts[i], &Font24, RED, WHITE);
           play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-          delay(beatInterval);
-      }
-      // if (needsRedraw) {
-      //     metro.check();
-      //     Serial.print("Current Time: ");
-      //     Serial.println(millis());
-      //     LCD_Clear(RED);
-      //     Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
-      //    Paint_DrawString_EN(0, 0, "Get Ready...", &Font16, RED, WHITE);
 
-      //    unsigned long beatInterval = 60000UL / lockedBPM;
-      //    const char* counts[] = {"4", "3", "2", "1", "Go!"};
-      //    for (int i = 0; i < 5; i++){
-      //     Paint_DrawRectangle (0, 40, 60, 70, RED, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-      //     Paint_DrawString_EN(0, 40, counts[i], &Font24, RED, WHITE);
-      //     play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-      //     delay(beatInterval);
-      //    }
-        //  metro.setBeatsPerMinute(lockedBPM);
-        //  metro.start();
+          long remaining = (long)(nextBeat - millis());
+          if (remaining > 0) delay(remaining);
+      }
         metro.stop();
         beatCount = 0;
         leadInCount = 0;
@@ -411,11 +350,6 @@ if (stateChanged){
          lastBeatTime = millis();
        }
 
-      //  metro.check();
-      //  if (metro.isOnBeat()) {
-      //   play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-      //     }
-
       unsigned long beatIntervalMs = 60000UL / lockedBPM;
     if (millis() - lastBeatTime >= beatIntervalMs) {
       lastBeatTime += beatIntervalMs;
@@ -423,13 +357,6 @@ if (stateChanged){
       
 }
 
-  //      metro.check();
-  //      if (metro.beat()) {
-  //          beatCount++;
-  //       if (beatCount % 2 == 0) {  // every other fire = true BPM
-  //        play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-  //   }
-  // } 
     Hit hit = waitForHit(PIEZO_PIN, 0.5, millis() + 2);
       if (hit.timestamp > 0) {
         // clearHit();
@@ -437,9 +364,6 @@ if (stateChanged){
         long error = (long)hit.timestamp - (long)expectedTime;
         int forceADC = (int)(hit.voltage * 4096 / 3.3);
         HitResult result = processHit(hit.timestamp, forceADC);
-        // if (result == HIT_GOOD || result == HIT_IGNORED) {
-        //   updateMissedNotes();  // only check for misses if hit didn't land near this note
-        // }
         if (result == HIT_GOOD) showAccuracy(error, FEEDBACK_TIMED);
         if (result == HIT_EXTRA) showAccuracy(0, FEEDBACK_EXTRA);
         showIntensity(hit.voltage);
@@ -454,40 +378,7 @@ if (stateChanged){
       if(remaining != lastRemaining){
         lastRemaining = remaining;
         char timerStr[10];
-        // sprintf(timerStr, "%lu", remaining);
-        // LCD_Clear(0xF800);
-        // Paint_DrawString_EN (40, 0, "sec", &Font24, RED, WHITE);
-        // Paint_DrawRectangle(0, 0, 30, 30, RED, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-        // Paint_DrawString_EN(0, 0, timerStr, &Font24, RED, WHITE);
-        // Paint_DrawString_EN(0, 60, "Click: STOP", &Font16, RED, WHITE);
-      }
         
-      // metro.check();
-      // if (metro.beat() && metro._tick == HIGH){
-      //     Serial.print("Playing metronome sound: ");
-      //     Serial.println(selectedSound.c_str());
-      //     play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-      //   }
-
-      // track expected beat time
-      // if (metro.beat()) expectedBeatTime = millis();
-      // if (metro.beat()){ // THIS MIGHT BE BREAKING THE SOUND
-      //   AudioRequest req;
-      //   strncpy(req.path, "/sounds/snare_test_1.wav", sizeof(req.path));
-      //   req.volume = 1.0;
-      //   xQueueSend(audioQueue, &req, 0);
-      // }
-
-      // metro.check();
-      // if (metro.isOnBeat()){
-      //   play_wav_from_sd("/sound_library/side_stick_test.wav", 1.0);
-      // }
-
-
-      // Waiting for the next hit
-      
-    
-      // clear feedback after duration
       if (lastFeedbackTime > 0 && millis() - lastFeedbackTime >= FEEDBACK_DURATION_MS) {
         clearFeedback();
         lastFeedbackTime = 0;
@@ -521,9 +412,6 @@ if (stateChanged){
         Paint_DrawString_EN(0, 0, scoreStr, &Font24, RED, WHITE);
       }
       if (needsRedraw) {
-          // LCD_Clear(0xF800);
-          // Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 90, 0xF800);
-          // Paint_DrawString_EN(0, 0, scoreStr, &Font24, RED, WHITE);
            Paint_DrawString_EN(0, 60, currentOption == 0 ? "> Try Again" : "  Try Again", &Font16, RED, WHITE);
            Paint_DrawString_EN(0, 76, currentOption == 1 ? "> Exit" : "  Exit", &Font16, RED, WHITE);
       }
